@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 const HUDOverlay = () => {
     const [scannedData, setScannedData] = useState([]);
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+    const [heartRate, setHeartRate] = useState(72);
 
     useEffect(() => {
         const handleMouseMove = (e) => {
@@ -11,14 +12,23 @@ const HUDOverlay = () => {
         };
         window.addEventListener('mousemove', handleMouseMove);
 
-        const interval = setInterval(() => {
+        const dataInterval = setInterval(() => {
             const newData = `DATA_${Math.floor(Math.random() * 9999).toString().padStart(4, '0')}`;
             setScannedData(prev => [newData, ...prev].slice(0, 5));
         }, 1500);
 
+        const hrInterval = setInterval(() => {
+            setHeartRate(prev => {
+                const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                const newValue = prev + change;
+                return Math.min(Math.max(newValue, 68), 75); // Keep between 68-75
+            });
+        }, 1000);
+
         return () => {
             window.removeEventListener('mousemove', handleMouseMove);
-            clearInterval(interval);
+            clearInterval(dataInterval);
+            clearInterval(hrInterval);
         };
     }, []);
 
@@ -56,7 +66,7 @@ const HUDOverlay = () => {
             <div className="absolute bottom-10 left-10 flex flex-col font-mono text-xs text-pink-300 opacity-70">
                 <div className="mb-2 border-b border-pink-500/50 pb-1 px-2 w-max">BIOMETRICS</div>
                 <div className="flex gap-4">
-                    <div>HR: <motion.span animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1, repeat: Infinity }}>72</motion.span> BPM</div>
+                    <div>HR: <motion.span key={heartRate} initial={{ opacity: 0.5 }} animate={{ opacity: 1 }} className="text-pink-100 font-bold">{heartRate}</motion.span> BPM</div>
                     <div>O2: 98%</div>
                     <div>GLU: <span className="text-cyan-300">CALCULATING...</span></div>
                 </div>
