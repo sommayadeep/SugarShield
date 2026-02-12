@@ -21,7 +21,7 @@ const SUGAR_OPTIONS = [
  * Manages the core user experience including sugar logging, gamification, 
  * daily activity tracking, and intelligent health insights.
  */
-export default function Dashboard({ user }) {
+const Dashboard = React.memo(function Dashboard({ user }) {
     const [activeTab, setActiveTab] = useState('home'); // 'home', 'history', 'rewards'
     const [streak, setStreak] = useState(storage.getStreak());
     const [xp, setXP] = useState(storage.getXP());
@@ -43,9 +43,11 @@ export default function Dashboard({ user }) {
     const level = Math.floor(xp / 100) + 1;
     const progress = xp % 100;
     const hour = new Date().getHours();
-    const motivationalQuote = insightEngine.getMotivationalQuote(hour, streak.count, level);
+    const motivationalQuote = React.useMemo(() =>
+        insightEngine.getMotivationalQuote(hour, streak.count, level),
+        [hour, streak.count, level]);
     const streakMilestone = insightEngine.checkStreakMilestone(streak.count);
-    
+
     // Check if today was logged
     const today = new Date().toISOString().split('T')[0];
     const todayLogged = logs.some(log => log.timestamp.startsWith(today));
@@ -209,13 +211,13 @@ export default function Dashboard({ user }) {
             // Insight (with explainability & early logging bonus)
             const riskScore = insightEngine.calculateRiskScore(safeUser, now, dailyData);
             const recommendation = insightEngine.getRecommendation(riskScore, safeUser, dailyData);
-            
+
             // Add bonus XP for early logging (before 6pm = +3 XP)
             const earlyBonusXP = now.getHours() < 18 ? 3 : 0;
             const totalWithBonus = totalXP + earlyBonusXP;
-            
+
             setLastAction({ ...recommendation, xp: totalWithBonus });
-            
+
             // UI Feedback
             setShowReward(true);
             try {
@@ -234,29 +236,29 @@ export default function Dashboard({ user }) {
                 try {
                     // Use Web Audio API as primary method
                     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    
+
                     // Create smooth, warm success melody
                     const createNote = (freq, startTime, duration, attackTime) => {
                         const osc = audioContext.createOscillator();
                         const gain = audioContext.createGain();
-                        
+
                         osc.type = 'sine'; // Smooth sine wave
                         osc.frequency.value = freq;
                         osc.connect(gain);
                         gain.connect(audioContext.destination);
-                        
+
                         // Smooth attack-sustain-release envelope
                         gain.gain.setValueAtTime(0, startTime);
                         gain.gain.linearRampToValueAtTime(0.2, startTime + attackTime);
                         gain.gain.setValueAtTime(0.2, startTime + duration - 0.1);
                         gain.gain.linearRampToValueAtTime(0, startTime + duration);
-                        
+
                         osc.start(startTime);
                         osc.stop(startTime + duration);
                     };
-                    
+
                     const now = audioContext.currentTime;
-                    
+
                     // Warm ascending major pentatonic melody (lower, pleasant range)
                     createNote(196.00, now, 0.35, 0.08);      // G3
                     createNote(246.94, now + 0.2, 0.35, 0.08); // B3
@@ -291,9 +293,11 @@ export default function Dashboard({ user }) {
             case 'history':
                 return (
                     <motion.div
+                        key="history"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
                         className="px-6 py-4"
                     >
                         <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-6">📝 Your History</h2>
@@ -309,7 +313,7 @@ export default function Dashboard({ user }) {
                                         whileHover={{ scale: 1.02, x: 5, transition: { duration: 0.3 } }}
                                         className={`p-4 rounded-2xl border shadow-lg hover:shadow-xl transition-all flex items-center gap-4 ${option?.color || 'bg-gradient-to-r from-slate-100 to-slate-50'} border-white/30`}
                                     >
-                                        <motion.div 
+                                        <motion.div
                                             className={`p-3 rounded-xl backdrop-blur-sm`}
                                             animate={{ scale: [1, 1.08, 1] }}
                                             transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
@@ -320,7 +324,7 @@ export default function Dashboard({ user }) {
                                             <p className="font-black capitalize text-base text-white drop-shadow">{log.type.replace('_', ' ')}</p>
                                             <p className="text-xs font-medium text-white/80 drop-shadow">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(log.timestamp).toLocaleDateString()}</p>
                                         </div>
-                                        <motion.div 
+                                        <motion.div
                                             className="text-right"
                                             whileHover={{ scale: 1.2 }}
                                         >
@@ -331,12 +335,12 @@ export default function Dashboard({ user }) {
                                 );
                             })}
                             {logs.length === 0 && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className="text-center py-16 px-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-3xl border-2 border-dashed border-purple-200"
                                 >
-                                    <motion.div 
+                                    <motion.div
                                         animate={{ y: [0, -10, 0] }}
                                         transition={{ repeat: Infinity, duration: 2 }}
                                         className="text-5xl mb-4"
@@ -353,19 +357,21 @@ export default function Dashboard({ user }) {
             case 'rewards':
                 return (
                     <motion.div
+                        key="rewards"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
                         className="px-6 py-4"
                     >
                         <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-orange-600 mb-6">🏆 Your Achievements</h2>
                         <div className="grid grid-cols-2 gap-4 mb-6">
-                            <motion.div 
+                            <motion.div
                                 whileHover={{ scale: 1.05, y: -10 }}
                                 className="bg-gradient-to-br from-purple-500 via-blue-500 to-purple-600 p-6 rounded-3xl text-center shadow-2xl border border-purple-300/50 relative overflow-hidden"
                             >
                                 <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                                <motion.div 
+                                <motion.div
                                     animate={{ rotate: [0, 8, -8, 0], y: [0, -8, 0] }}
                                     transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
                                     className="text-5xl mb-3"
@@ -376,12 +382,12 @@ export default function Dashboard({ user }) {
                                 <p className="text-5xl font-black text-white drop-shadow-lg">{level}</p>
                                 <p className="text-xs text-purple-100 mt-2">🎯 Progress: {progress}%</p>
                             </motion.div>
-                            <motion.div 
+                            <motion.div
                                 whileHover={{ scale: 1.05, y: -10 }}
                                 className="bg-gradient-to-br from-orange-400 via-red-500 to-pink-500 p-6 rounded-3xl text-center shadow-2xl border border-orange-300/50 relative overflow-hidden"
                             >
                                 <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
-                                <motion.div 
+                                <motion.div
                                     animate={{ rotate: [0, 12, -12, 0] }}
                                     transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
                                     className="text-5xl mb-3"
@@ -396,7 +402,7 @@ export default function Dashboard({ user }) {
                         <div className="mb-6">
                             <h3 className="text-xl font-black text-slate-800 mb-4">📈 Stats & Metrics</h3>
                             <div className="space-y-3">
-                                <motion.div 
+                                <motion.div
                                     whileHover={{ x: 10 }}
                                     className="bg-gradient-to-r from-purple-50 to-blue-50 p-5 rounded-2xl border border-purple-200/50 flex justify-between items-center group hover:shadow-lg transition-all"
                                 >
@@ -409,7 +415,7 @@ export default function Dashboard({ user }) {
                                         <p className="text-xs text-purple-500 font-bold">✨ XP</p>
                                     </div>
                                 </motion.div>
-                                <motion.div 
+                                <motion.div
                                     whileHover={{ x: 10 }}
                                     className="bg-gradient-to-r from-orange-50 to-red-50 p-5 rounded-2xl border border-orange-200/50 flex justify-between items-center group hover:shadow-lg transition-all"
                                 >
@@ -440,16 +446,15 @@ export default function Dashboard({ user }) {
                                     const dateStr = date.toISOString().split('T')[0];
                                     const dayLogged = logs.some(log => log.timestamp.startsWith(dateStr));
                                     const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-                                    
+
                                     return (
                                         <motion.div
                                             key={i}
                                             whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
-                                            className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all ${
-                                                dayLogged
-                                                    ? 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-blue-400/50'
-                                                    : 'bg-white/50 text-slate-400'
-                                            }`}
+                                            className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all ${dayLogged
+                                                ? 'bg-gradient-to-br from-cyan-400 to-blue-500 text-white shadow-lg shadow-blue-400/50'
+                                                : 'bg-white/50 text-slate-400'
+                                                }`}
                                         >
                                             <p className="text-xs font-black uppercase mb-1">{dayName}</p>
                                             <p className="text-lg font-black">{dayLogged ? '✓' : '-'}</p>
@@ -490,9 +495,11 @@ export default function Dashboard({ user }) {
             default:
                 return (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        key="home"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
                     >
                         {/* XP Bar */}
                         <div className="px-6 mb-8 mt-6">
@@ -530,7 +537,7 @@ export default function Dashboard({ user }) {
                         <div className="px-6 mb-8">
                             <h2 className="text-xl font-black text-slate-800 mb-4">📊 Daily Activity</h2>
                             <div className="grid grid-cols-2 gap-4">
-                                <motion.div 
+                                <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     className="bg-gradient-to-br from-cyan-50 to-blue-50 p-5 rounded-2xl border border-cyan-200/50 shadow-lg hover:shadow-xl transition-all"
                                 >
@@ -547,9 +554,9 @@ export default function Dashboard({ user }) {
                                         className="text-3xl font-black text-cyan-600 bg-transparent outline-none w-full"
                                         placeholder="0"
                                     />
-                                  <p className="text-xs text-slate-500 mt-2">👟 Goal: 10,000 steps</p>
+                                    <p className="text-xs text-slate-500 mt-2">👟 Goal: 10,000 steps</p>
                                 </motion.div>
-                                <motion.div 
+                                <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     className="bg-gradient-to-br from-indigo-50 to-purple-50 p-5 rounded-2xl border border-indigo-200/50 shadow-lg hover:shadow-xl transition-all"
                                 >
@@ -635,11 +642,10 @@ export default function Dashboard({ user }) {
                             <motion.div
                                 animate={{ scale: [1, 1.2, 1] }}
                                 transition={{ repeat: Infinity, duration: 2.5 }}
-                                className={`px-3 py-1.5 rounded-full text-xs font-bold ${
-                                    dailyData.sleep < 6 || dailyData.steps < 4000
-                                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500/50'
-                                        : 'bg-green-500/20 text-green-300 border border-green-500/50'
-                                }`}
+                                className={`px-3 py-1.5 rounded-full text-xs font-bold ${dailyData.sleep < 6 || dailyData.steps < 4000
+                                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/50'
+                                    : 'bg-green-500/20 text-green-300 border border-green-500/50'
+                                    }`}
                             >
                                 {dailyData.sleep < 6 || dailyData.steps < 4000 ? '⚠️ Vulnerable' : '💚 Strong'}
                             </motion.div>
@@ -720,7 +726,7 @@ export default function Dashboard({ user }) {
                                 >
                                     {lastAction.insight}
                                 </motion.p>
-                                
+
                                 {lastAction.reason && (
                                     <motion.p
                                         initial={{ opacity: 0 }}
@@ -731,7 +737,7 @@ export default function Dashboard({ user }) {
                                         💭 Why: {lastAction.reason}
                                     </motion.p>
                                 )}
-                                
+
                                 <motion.div
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
@@ -787,7 +793,7 @@ export default function Dashboard({ user }) {
                                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
                                 className="absolute -bottom-20 -left-20 w-40 h-40 bg-white/10 rounded-full blur-3xl"
                             />
-                            
+
                             <div className="relative z-10">
                                 <motion.div
                                     animate={{ y: [0, -18, 0], rotate: [0, 8, -8, 0] }}
@@ -801,7 +807,7 @@ export default function Dashboard({ user }) {
                                         className="absolute inset-0 bg-gradient-to-r from-yellow-300/30 to-orange-400/30 rounded-full"
                                     />
                                 </motion.div>
-                                
+
                                 <motion.h2
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -810,7 +816,7 @@ export default function Dashboard({ user }) {
                                 >
                                     🎊 LEVEL UP! 🎊
                                 </motion.h2>
-                                
+
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -819,7 +825,7 @@ export default function Dashboard({ user }) {
                                 >
                                     LEVEL {level}
                                 </motion.div>
-                                
+
                                 <motion.p
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -828,7 +834,7 @@ export default function Dashboard({ user }) {
                                 >
                                     🛡️ You're becoming unstoppable! Your shield against sugar is growing stronger. Keep up the momentum!
                                 </motion.p>
-                                
+
                                 <motion.button
                                     whileHover={{ scale: 1.08, y: -5 }}
                                     whileTap={{ scale: 0.92 }}
@@ -869,7 +875,7 @@ export default function Dashboard({ user }) {
                                 transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
                                 className="absolute -bottom-20 -left-20 w-40 h-40 bg-yellow-300/15 rounded-full blur-3xl"
                             />
-                            
+
                             <div className="relative z-10">
                                 {/* Gift Box Animation */}
                                 <motion.div
@@ -880,7 +886,7 @@ export default function Dashboard({ user }) {
                                 >
                                     🎁
                                 </motion.div>
-                                
+
                                 <motion.h2
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -889,7 +895,7 @@ export default function Dashboard({ user }) {
                                 >
                                     🎊 ACHIEVEMENT! 🎊
                                 </motion.h2>
-                                
+
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
@@ -898,7 +904,7 @@ export default function Dashboard({ user }) {
                                 >
                                     {milestoneData.message}
                                 </motion.div>
-                                
+
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -909,7 +915,7 @@ export default function Dashboard({ user }) {
                                     <p className="text-5xl font-black text-yellow-100 drop-shadow-lg">+{milestoneData.bonus} XP</p>
                                     <p className="text-sm text-white/80 mt-2">Keep your streak going! 🔥</p>
                                 </motion.div>
-                                
+
                                 <motion.p
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -920,7 +926,7 @@ export default function Dashboard({ user }) {
                                     {milestoneData.message === '🏆 30-Day Legend!' && 'Legendary commitment! 30 days of unstoppable progress! 👑'}
                                     {milestoneData.message === '👑 100-Day Master!' && 'LEGENDARY STATUS! 100 days of pure mastery! You are a true champion! 💪'}
                                 </motion.p>
-                                
+
                                 <motion.button
                                     whileHover={{ scale: 1.08, y: -5 }}
                                     whileTap={{ scale: 0.92 }}
@@ -956,7 +962,7 @@ export default function Dashboard({ user }) {
                                 transition={{ duration: 3, repeat: Infinity }}
                                 className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"
                             />
-                            
+
                             <div className="relative z-10">
                                 <motion.div
                                     animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
@@ -970,7 +976,7 @@ export default function Dashboard({ user }) {
                                         <Trophy size={40} strokeWidth={1.5} />
                                     </motion.div>
                                 </motion.div>
-                                
+
                                 <motion.h3
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -979,7 +985,7 @@ export default function Dashboard({ user }) {
                                 >
                                     💎 Unlock Premium
                                 </motion.h3>
-                                
+
                                 <motion.p
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -988,7 +994,7 @@ export default function Dashboard({ user }) {
                                 >
                                     You've logged {logs.length} items! Create an account to unlock long-term trends, personalized insights, and advanced health reports.
                                 </motion.p>
-                                
+
                                 <motion.div
                                     initial={{ opacity: 0, y: 15 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -1003,7 +1009,7 @@ export default function Dashboard({ user }) {
                                     >
                                         Create Account Now ✨
                                     </motion.button>
-                                    
+
                                     <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
@@ -1039,11 +1045,10 @@ export default function Dashboard({ user }) {
                     whileHover={{ scale: 1.1, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTab('home')}
-                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${
-                        activeTab === 'home' 
-                            ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/50 scale-105' 
-                            : 'text-slate-400 hover:text-slate-200'
-                    }`}
+                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${activeTab === 'home'
+                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/50 scale-105'
+                        : 'text-slate-400 hover:text-slate-200'
+                        }`}
                 >
                     <motion.div
                         animate={activeTab === 'home' ? { rotate: 360 } : { rotate: 0 }}
@@ -1057,11 +1062,10 @@ export default function Dashboard({ user }) {
                     whileHover={{ scale: 1.1, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTab('history')}
-                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${
-                        activeTab === 'history' 
-                            ? 'bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50 scale-105' 
-                            : 'text-slate-400 hover:text-slate-200'
-                    }`}
+                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${activeTab === 'history'
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/50 scale-105'
+                        : 'text-slate-400 hover:text-slate-200'
+                        }`}
                 >
                     <motion.div
                         animate={activeTab === 'history' ? { y: [0, -5, 0] } : { y: 0 }}
@@ -1075,11 +1079,10 @@ export default function Dashboard({ user }) {
                     whileHover={{ scale: 1.1, y: -5 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setActiveTab('rewards')}
-                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${
-                        activeTab === 'rewards' 
-                            ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/50 scale-105' 
-                            : 'text-slate-400 hover:text-slate-200'
-                    }`}
+                    className={`flex flex-col items-center gap-2 px-6 py-3 rounded-2xl transition-all duration-300 ${activeTab === 'rewards'
+                        ? 'bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/50 scale-105'
+                        : 'text-slate-400 hover:text-slate-200'
+                        }`}
                 >
                     <motion.div
                         animate={activeTab === 'rewards' ? { rotate: [0, -10, 10, 0] } : { rotate: 0 }}
@@ -1092,4 +1095,6 @@ export default function Dashboard({ user }) {
             </div>
         </div>
     );
-}
+});
+
+export default Dashboard;

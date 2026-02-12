@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Onboarding from './components/Onboarding'
 import Dashboard from './components/Dashboard'
 import { storage } from './utils/storage'
@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     const handleMouseMove = (e) => {
       setMousePos({ x: e.clientX, y: e.clientY })
-      
+
       // Create particle burst on mouse move
       if (Math.random() > 0.8) {
         const newParticle = {
@@ -43,7 +43,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 relative overflow-hidden">
       {/* Robot Skeleton Framework */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        
+
         {/* Central Robot Skeleton */}
         <svg className="absolute inset-0 w-full h-full opacity-15" preserveAspectRatio="none">
           {/* Spine */}
@@ -126,9 +126,8 @@ function App() {
                 y: particle.y + (Math.random() - 0.5) * 200
               }}
               transition={{ duration: 1.2, ease: 'easeOut' }}
-              className={`absolute w-3 h-3 rounded-full ${
-                Math.random() > 0.5 ? 'bg-pink-500 shadow-lg shadow-pink-500' : 'bg-cyan-400 shadow-lg shadow-cyan-400'
-              }`}
+              className={`absolute w-3 h-3 rounded-full ${Math.random() > 0.5 ? 'bg-pink-500 shadow-lg shadow-pink-500' : 'bg-cyan-400 shadow-lg shadow-cyan-400'
+                }`}
             />
           ))}
         </motion.div>
@@ -139,7 +138,7 @@ function App() {
             d={`M0,${window.innerHeight * 0.3} L${window.innerWidth},${window.innerHeight * 0.3}`}
             stroke="url(#neonGradient1)"
             strokeWidth="2"
-            animate={{ 
+            animate={{
               strokeDashoffset: [0, 100],
               opacity: [0.3, 0.8, 0.3]
             }}
@@ -149,7 +148,7 @@ function App() {
             d={`M0,${window.innerHeight * 0.5} L${window.innerWidth},${window.innerHeight * 0.5}`}
             stroke="url(#neonGradient2)"
             strokeWidth="2"
-            animate={{ 
+            animate={{
               strokeDashoffset: [0, 100],
               opacity: [0.3, 0.8, 0.3]
             }}
@@ -159,7 +158,7 @@ function App() {
             d={`M0,${window.innerHeight * 0.7} L${window.innerWidth},${window.innerHeight * 0.7}`}
             stroke="url(#neonGradient3)"
             strokeWidth="2"
-            animate={{ 
+            animate={{
               strokeDashoffset: [0, 100],
               opacity: [0.2, 0.7, 0.2]
             }}
@@ -186,7 +185,7 @@ function App() {
 
         {/* Neon Glow Orbs */}
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.3, 1],
             opacity: [0.15, 0.35, 0.15]
           }}
@@ -195,7 +194,7 @@ function App() {
         />
 
         <motion.div
-          animate={{ 
+          animate={{
             scale: [1, 1.2, 1],
             opacity: [0.1, 0.3, 0.1]
           }}
@@ -208,23 +207,22 @@ function App() {
           <motion.div
             key={`neon-flow-${i}`}
             initial={{ opacity: 0, x: -100, y: Math.random() * window.innerHeight }}
-            animate={{ 
+            animate={{
               opacity: [0, 0.6, 0],
               x: [-100, window.innerWidth + 100],
               y: Math.sin(i) * 80
             }}
-            transition={{ 
-              duration: 8 + i * 0.5, 
+            transition={{
+              duration: 8 + i * 0.5,
               repeat: Infinity,
               ease: 'easeInOut',
               delay: i * 0.8
             }}
-            className={`absolute w-2 h-2 rounded-full blur-md shadow-lg ${
-              i % 4 === 0 ? 'bg-pink-500 shadow-pink-500' :
+            className={`absolute w-2 h-2 rounded-full blur-md shadow-lg ${i % 4 === 0 ? 'bg-pink-500 shadow-pink-500' :
               i % 4 === 1 ? 'bg-cyan-400 shadow-cyan-400' :
-              i % 4 === 2 ? 'bg-purple-500 shadow-purple-500' :
-              'bg-lime-400 shadow-lime-400'
-            }`}
+                i % 4 === 2 ? 'bg-purple-500 shadow-purple-500' :
+                  'bg-lime-400 shadow-lime-400'
+              }`}
           />
         ))}
 
@@ -237,7 +235,7 @@ function App() {
             width="100%"
             height="100%"
             fill="url(#hexagon)"
-            animate={{ 
+            animate={{
               opacity: [0.15, 0.4, 0.15]
             }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -247,11 +245,29 @@ function App() {
 
       {/* Content Layer */}
       <div className="relative z-10">
-        {!user ? (
-          <Onboarding onComplete={setUser} />
-        ) : (
-          <Dashboard user={user} />
-        )}
+        <AnimatePresence mode="wait">
+          {!user ? (
+            <motion.div
+              key="onboarding"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Onboarding onComplete={setUser} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="dashboard"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Dashboard user={user} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
