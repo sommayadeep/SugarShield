@@ -43,7 +43,7 @@ export default function Onboarding({ onComplete }) {
     const isStepValid = formData[step.id] !== '';
 
     const getGradientByStep = () => {
-        switch(currentStep) {
+        switch (currentStep) {
             case 0: return 'from-cyan-500 via-blue-600 to-purple-700';
             case 1: return 'from-blue-500 via-purple-600 to-pink-700';
             case 2: return 'from-purple-500 via-pink-600 to-rose-700';
@@ -53,17 +53,20 @@ export default function Onboarding({ onComplete }) {
     };
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            {/* Fixed Background Layer */}
+            <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 z-0" />
+
             {/* Animated Background Elements */}
             <motion.div
                 animate={{ rotate: 360, y: [0, 25, 0] }}
                 transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl"
+                className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl z-0"
             />
             <motion.div
                 animate={{ rotate: -360, y: [0, -25, 0] }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"
+                className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl z-0"
             />
 
             <div className="w-full max-w-md relative z-10">
@@ -107,13 +110,12 @@ export default function Onboarding({ onComplete }) {
                                 initial={{ scaleX: 0 }}
                                 animate={{ scaleX: 1 }}
                                 transition={{ delay: i * 0.1 }}
-                                className={`flex-1 h-2 rounded-full transition-all duration-500 ${
-                                    i < currentStep
+                                className={`flex-1 h-2 rounded-full transition-all duration-500 ${i < currentStep
                                         ? `bg-gradient-to-r ${getGradientByStep()}`
                                         : i === currentStep
-                                        ? `bg-gradient-to-r ${getGradientByStep()} shadow-lg`
-                                        : 'bg-slate-700'
-                                }`}
+                                            ? `bg-gradient-to-r ${getGradientByStep()} shadow-lg`
+                                            : 'bg-slate-700'
+                                    }`}
                             />
                         ))}
                     </div>
@@ -147,7 +149,6 @@ export default function Onboarding({ onComplete }) {
                                 onChange={handleChange}
                                 placeholder={step.placeholder}
                                 className="w-full p-5 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-xl text-white placeholder-white/50 font-bold"
-                                autoFocus
                             />
                         ) : (
                             <motion.div
@@ -165,11 +166,10 @@ export default function Onboarding({ onComplete }) {
                                         whileHover={{ scale: 1.05, x: 10, transition: { duration: 0.2 } }}
                                         whileTap={{ scale: 0.95, transition: { duration: 0.15 } }}
                                         onClick={() => setFormData({ ...formData, [step.id]: opt })}
-                                        className={`p-5 rounded-2xl border-2 transition-all text-lg font-bold ${
-                                            formData[step.id] === opt
+                                        className={`p-5 rounded-2xl border-2 transition-all text-lg font-bold ${formData[step.id] === opt
                                                 ? 'border-white bg-white/20 backdrop-blur-sm text-white scale-105'
                                                 : 'border-white/30 bg-white/10 backdrop-blur-sm text-white/80 hover:border-white/50 hover:text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {opt}
                                     </motion.button>
@@ -188,11 +188,10 @@ export default function Onboarding({ onComplete }) {
                                 whileTap={{ scale: 0.9 }}
                                 onClick={handleBack}
                                 disabled={currentStep === 0}
-                                className={`p-4 rounded-2xl border-2 border-white/30 flex items-center justify-center transition-all backdrop-blur-sm ${
-                                    currentStep === 0
+                                className={`p-4 rounded-2xl border-2 border-white/30 flex items-center justify-center transition-all backdrop-blur-sm ${currentStep === 0
                                         ? 'opacity-0 pointer-events-none'
                                         : 'hover:bg-white/20 text-white'
-                                }`}
+                                    }`}
                             >
                                 <ChevronLeft size={24} strokeWidth={3} />
                             </motion.button>
@@ -202,9 +201,8 @@ export default function Onboarding({ onComplete }) {
                                 whileTap={isStepValid ? { scale: 0.92, transition: { duration: 0.15 } } : {}}
                                 onClick={handleNext}
                                 disabled={!isStepValid}
-                                className={`flex-1 bg-white text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 font-black text-lg rounded-2xl flex items-center justify-center gap-3 border-2 border-white transition-all py-4 ${
-                                    !isStepValid ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-white/20'
-                                }`}
+                                className={`flex-1 bg-white text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 font-black text-lg rounded-2xl flex items-center justify-center gap-3 border-2 border-white transition-all py-4 ${!isStepValid ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-white/20'
+                                    }`}
                             >
                                 {currentStep === steps.length - 1 ? 'Let\'s Begin' : 'Next'}
                                 <motion.div
