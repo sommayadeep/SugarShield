@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Onboarding from './components/Onboarding'
 import Dashboard from './components/Dashboard'
+import HUDOverlay from './components/HUDOverlay'
 import { storage } from './utils/storage'
 
 function App() {
@@ -245,6 +246,7 @@ function App() {
 
       {/* Content Layer */}
       <div className="relative z-10">
+        <HUDOverlay />
         <AnimatePresence mode="wait">
           {!user ? (
             <motion.div
