@@ -1086,114 +1086,104 @@ const [profileForm, setProfileForm] = useState({
                 )}
             </AnimatePresence>
 
-            {/* Profile Edit Modal - Simplified for Mobile Performance */}
-            <AnimatePresence>
-                {showProfileEdit && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                            className="w-full max-w-md"
+            {/* Profile Edit Modal - No Animations for Max Mobile Performance */}
+            {showProfileEdit && (
+                <div className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/95">
+                    <div className="w-full max-w-md">
+                        {/* Header */}
+                        <div className="text-center mb-6">
+                            <div className="text-4xl mb-2">✏️</div>
+                            <h3 className="text-2xl font-black text-white">Update Profile</h3>
+                            <p className="text-sm text-white/60 font-medium mt-1">Update your details</p>
+                        </div>
+
+                        {/* Form Card */}
+                        <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-6 text-white shadow-2xl">
+                            {/* Age Input */}
+                            <div className="mb-4">
+                                <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">🎂 Age</label>
+                                <input
+                                    type="number"
+                                    value={profileForm.age}
+                                    onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
+                                    placeholder="Enter your age"
+                                    className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 text-white placeholder-white/50 font-bold"
+                                />
+                            </div>
+
+                            {/* Height Input */}
+                            <div className="mb-4">
+                                <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">📏 Height (cm)</label>
+                                <input
+                                    type="number"
+                                    value={profileForm.height}
+                                    onChange={(e) => setProfileForm({ ...profileForm, height: e.target.value })}
+                                    placeholder="Enter height in cm"
+                                    className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 text-white placeholder-white/50 font-bold"
+                                />
+                            </div>
+
+                            {/* Weight Input */}
+                            <div className="mb-4">
+                                <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">⚖️ Weight (kg)</label>
+                                <input
+                                    type="number"
+                                    value={profileForm.weight}
+                                    onChange={(e) => setProfileForm({ ...profileForm, weight: e.target.value })}
+                                    placeholder="Enter weight in kg"
+                                    className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 text-white placeholder-white/50 font-bold"
+                                />
+                            </div>
+
+                            {/* Gender Selection */}
+                            <div className="mb-6">
+                                <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">👤 Gender</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {GENDER_OPTIONS.map((opt) => (
+                                        <button
+                                            key={opt}
+                                            onClick={() => setProfileForm({ ...profileForm, gender: opt })}
+                                            className={`p-3 rounded-xl border-2 text-sm font-bold ${profileForm.gender === opt
+                                                    ? 'border-white bg-white/30 text-white'
+                                                    : 'border-white/30 bg-white/10 text-white/70'
+                                                }`}
+                                        >
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowProfileEdit(false)}
+                                    className="flex-1 py-3 px-4 bg-white/10 text-white font-bold text-sm rounded-2xl border border-white/30"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleProfileUpdate();
+                                        setShowProfileEdit(false);
+                                    }}
+                                    className="flex-1 py-3 px-4 bg-white text-blue-600 font-black text-base rounded-2xl"
+                                >
+                                    Save 💾
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Close button outside */}
+                        <button
+                            onClick={() => setShowProfileEdit(false)}
+                            className="mt-6 w-full py-3 text-white/60 font-bold"
                         >
-                            {/* Header */}
-                            <div className="text-center mb-6">
-                                <div className="text-4xl mb-2">✏️</div>
-                                <h3 className="text-2xl font-black text-white">Update Profile</h3>
-                                <p className="text-sm text-white/60 font-medium mt-1">Update your details anytime</p>
-                            </div>
-
-                            {/* Form Card */}
-                            <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-6 text-white shadow-2xl border border-white/10">
-                                {/* Age Input */}
-                                <div className="mb-4">
-                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">🎂 Age</label>
-                                    <input
-                                        type="number"
-                                        value={profileForm.age}
-                                        onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
-                                        placeholder="Enter your age"
-                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
-                                    />
-                                </div>
-
-                                {/* Height Input */}
-                                <div className="mb-4">
-                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">📏 Height (cm)</label>
-                                    <input
-                                        type="number"
-                                        value={profileForm.height}
-                                        onChange={(e) => setProfileForm({ ...profileForm, height: e.target.value })}
-                                        placeholder="Enter height in cm"
-                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
-                                    />
-                                </div>
-
-                                {/* Weight Input */}
-                                <div className="mb-4">
-                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">⚖️ Weight (kg)</label>
-                                    <input
-                                        type="number"
-                                        value={profileForm.weight}
-                                        onChange={(e) => setProfileForm({ ...profileForm, weight: e.target.value })}
-                                        placeholder="Enter weight in kg"
-                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
-                                    />
-                                </div>
-
-                                {/* Gender Selection */}
-                                <div className="mb-6">
-                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">👤 Gender</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {GENDER_OPTIONS.map((opt) => (
-                                            <button
-                                                key={opt}
-                                                onClick={() => setProfileForm({ ...profileForm, gender: opt })}
-                                                className={`p-3 rounded-xl border-2 transition-all text-sm font-bold ${profileForm.gender === opt
-                                                        ? 'border-white bg-white/30 backdrop-blur-sm text-white'
-                                                        : 'border-white/30 bg-white/10 backdrop-blur-sm text-white/70 hover:border-white/50'
-                                                    }`}
-                                            >
-                                                {opt}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Buttons */}
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setShowProfileEdit(false)}
-                                        className="flex-1 py-3 px-4 bg-white/10 backdrop-blur-sm text-white font-bold text-sm rounded-2xl border border-white/30 hover:bg-white/20 transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            handleProfileUpdate();
-                                            setShowProfileEdit(false);
-                                        }}
-                                        className="flex-1 py-3 px-4 bg-white text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-black text-base rounded-2xl border-2 border-white hover:shadow-lg hover:shadow-white/20 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        Save 💾
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Motivational Text */}
-                            <p className="text-center text-white/50 text-xs mt-6 font-medium">
-                                🎯 Keep your profile updated for better insights
-                            </p>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Bottom Navigation */}
             <div className="fixed bottom-6 inset-x-6 h-24 bg-gradient-to-t from-slate-900/95 to-slate-800/90 backdrop-blur-2xl border border-slate-700/50 rounded-3xl flex items-center justify-around px-4 shadow-2xl z-40 ring-1 ring-white/10">
