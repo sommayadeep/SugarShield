@@ -21,6 +21,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Performance optimizations */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 body {
@@ -29,87 +34,59 @@ body {
   min-width: 320px;
   min-height: 100vh;
   color: #1e293b;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
 }
 
-/* Smooth Animation Keyframes */
-@keyframes smoothSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Smooth Animation Keyframes - CSS only for better performance */
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
-@keyframes smoothFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes gentleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
-@keyframes smoothScale {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+@keyframes gentleRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-@keyframes smoothBounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
+@keyframes slowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-@keyframes smoothRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes gentleShine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
-@keyframes smoothPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
+/* GPU-accelerated animations */
+.gpu-animate {
+  will-change: transform;
+  transform: translateZ(0);
 }
 
-@layer components {
-  .btn-primary {
-    @apply px-6 py-3 bg-primary text-white rounded-full font-semibold shadow-lg active:scale-95 transition-all duration-300 ease-out hover:shadow-xl;
-  }
+.animate-gentle-pulse {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
 
-  .card {
-    @apply bg-white/80 backdrop-blur-md border border-white/20 rounded-3xl shadow-xl p-6 transition-all duration-300 ease-out;
-  }
+.animate-gentle-bounce {
+  animation: gentleBounce 2s ease-in-out infinite;
+}
 
-  .smooth-slide-in {
-    animation: smoothSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
+.animate-slow-spin {
+  animation: slowSpin 8s linear infinite;
+}
 
-  .smooth-fade-in {
-    animation: smoothFadeIn 0.5s ease-out forwards;
-  }
-
-  .smooth-pulse {
-    animation: smoothPulse 2s ease-in-out infinite;
-  }
+.animate-shine {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background-size: 200% 100%;
+  animation: gentleShine 3s ease-in-out infinite;
 }
