@@ -1086,65 +1086,33 @@ const [profileForm, setProfileForm] = useState({
                 )}
             </AnimatePresence>
 
-            {/* Profile Edit Modal - Onboarding Style */}
+            {/* Profile Edit Modal - Simplified for Mobile Performance */}
             <AnimatePresence>
                 {showProfileEdit && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-lg"
+                        className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-md"
                     >
-                        {/* Animated Background */}
                         <motion.div
-                            animate={{ rotate: 360, y: [0, 25, 0] }}
-                            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-                            className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl"
-                        />
-                        <motion.div
-                            animate={{ rotate: -360, y: [0, -25, 0] }}
-                            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                            className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"
-                        />
-
-                        <motion.div
-                            initial={{ scale: 0.7, opacity: 0, y: 50 }}
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.7, opacity: 0, y: 50 }}
-                            transition={{ type: "spring", damping: 15, stiffness: 300 }}
-                            className="w-full max-w-md relative z-10"
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                            className="w-full max-w-md"
                         >
                             {/* Header */}
-                            <motion.div
-                                initial={{ opacity: 0, y: -20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-center mb-8"
-                            >
-                                <motion.div
-                                    animate={{ scale: [1, 1.08, 1] }}
-                                    transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
-                                    className="text-4xl mb-3"
-                                >
-                                    ✏️
-                                </motion.div>
-                                <h3 className="text-2xl font-black text-white drop-shadow-lg">Update Profile</h3>
+                            <div className="text-center mb-6">
+                                <div className="text-4xl mb-2">✏️</div>
+                                <h3 className="text-2xl font-black text-white">Update Profile</h3>
                                 <p className="text-sm text-white/60 font-medium mt-1">Update your details anytime</p>
-                            </motion.div>
+                            </div>
 
                             {/* Form Card */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-6 text-white shadow-2xl border border-white/10"
-                            >
+                            <div className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-6 text-white shadow-2xl border border-white/10">
                                 {/* Age Input */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.15 }}
-                                    className="mb-4"
-                                >
+                                <div className="mb-4">
                                     <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">🎂 Age</label>
                                     <input
                                         type="number"
@@ -1153,15 +1121,10 @@ const [profileForm, setProfileForm] = useState({
                                         placeholder="Enter your age"
                                         className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
                                     />
-                                </motion.div>
+                                </div>
 
                                 {/* Height Input */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="mb-4"
-                                >
+                                <div className="mb-4">
                                     <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">📏 Height (cm)</label>
                                     <input
                                         type="number"
@@ -1170,15 +1133,10 @@ const [profileForm, setProfileForm] = useState({
                                         placeholder="Enter height in cm"
                                         className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
                                     />
-                                </motion.div>
+                                </div>
 
                                 {/* Weight Input */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.25 }}
-                                    className="mb-4"
-                                >
+                                <div className="mb-4">
                                     <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">⚖️ Weight (kg)</label>
                                     <input
                                         type="number"
@@ -1187,25 +1145,15 @@ const [profileForm, setProfileForm] = useState({
                                         placeholder="Enter weight in kg"
                                         className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
                                     />
-                                </motion.div>
+                                </div>
 
                                 {/* Gender Selection */}
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="mb-6"
-                                >
+                                <div className="mb-6">
                                     <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">👤 Gender</label>
                                     <div className="grid grid-cols-3 gap-2">
-                                        {GENDER_OPTIONS.map((opt, idx) => (
-                                            <motion.button
+                                        {GENDER_OPTIONS.map((opt) => (
+                                            <button
                                                 key={opt}
-                                                initial={{ opacity: 0, y: -10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.35 + idx * 0.05 }}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
                                                 onClick={() => setProfileForm({ ...profileForm, gender: opt })}
                                                 className={`p-3 rounded-xl border-2 transition-all text-sm font-bold ${profileForm.gender === opt
                                                         ? 'border-white bg-white/30 backdrop-blur-sm text-white'
@@ -1213,29 +1161,20 @@ const [profileForm, setProfileForm] = useState({
                                                     }`}
                                             >
                                                 {opt}
-                                            </motion.button>
+                                            </button>
                                         ))}
                                     </div>
-                                </motion.div>
+                                </div>
 
                                 {/* Buttons */}
-                                <motion.div
-                                    initial={{ opacity: 0, y: 15 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.4 }}
-                                    className="flex gap-3"
-                                >
-                                    <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                <div className="flex gap-3">
+                                    <button
                                         onClick={() => setShowProfileEdit(false)}
                                         className="flex-1 py-3 px-4 bg-white/10 backdrop-blur-sm text-white font-bold text-sm rounded-2xl border border-white/30 hover:bg-white/20 transition-all"
                                     >
                                         Cancel
-                                    </motion.button>
-                                    <motion.button
-                                        whileHover={{ scale: 1.05, y: -2 }}
-                                        whileTap={{ scale: 0.95 }}
+                                    </button>
+                                    <button
                                         onClick={() => {
                                             handleProfileUpdate();
                                             setShowProfileEdit(false);
@@ -1243,19 +1182,14 @@ const [profileForm, setProfileForm] = useState({
                                         className="flex-1 py-3 px-4 bg-white text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-black text-base rounded-2xl border-2 border-white hover:shadow-lg hover:shadow-white/20 transition-all flex items-center justify-center gap-2"
                                     >
                                         Save 💾
-                                    </motion.button>
-                                </motion.div>
-                            </motion.div>
+                                    </button>
+                                </div>
+                            </div>
 
                             {/* Motivational Text */}
-                            <motion.p
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                                className="text-center text-white/50 text-xs mt-6 font-medium"
-                            >
+                            <p className="text-center text-white/50 text-xs mt-6 font-medium">
                                 🎯 Keep your profile updated for better insights
-                            </motion.p>
+                            </p>
                         </motion.div>
                     </motion.div>
                 )}
