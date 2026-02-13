@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Trophy, Plus, MapPin, Coffee, Beer, Candy, Cookie, Footprints } from 'lucide-react';
+import { Flame, Trophy, Plus, MapPin, Coffee, Beer, Candy, Cookie, Footprints, User, Pencil, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { storage } from '../utils/storage';
+import { storage, calculateBMI } from '../utils/storage';
 import { insightEngine } from '../utils/insightEngine';
 
 /**
@@ -16,13 +16,15 @@ const SUGAR_OPTIONS = [
     { id: 'snack', label: 'Packaged Snack', icon: Cookie, color: 'bg-gradient-to-br from-orange-400 to-red-500 text-white shadow-lg shadow-orange-500/50' },
 ];
 
+const GENDER_OPTIONS = ['👨 Male', '👩 Female', '🌈 Other'];
+
 /**
  * Main Dashboard Component
  * Manages the core user experience including sugar logging, gamification, 
  * daily activity tracking, and intelligent health insights.
  */
 const Dashboard = React.memo(function Dashboard({ user }) {
-    const [activeTab, setActiveTab] = useState('home'); // 'home', 'history', 'rewards'
+const [activeTab, setActiveTab] = useState('home'); // 'home', 'history', 'rewards', 'profile'
     const [streak, setStreak] = useState(storage.getStreak());
     const [xp, setXP] = useState(storage.getXP());
     const [showReward, setShowReward] = useState(false);
@@ -36,6 +38,23 @@ const Dashboard = React.memo(function Dashboard({ user }) {
     const [dailyData, setDailyData] = useState(storage.getDailyData());
     const [streakNotification, setStreakNotification] = useState(null);
     const [audioSupported, setAudioSupported] = useState(true);
+const [profileForm, setProfileForm] = useState({
+        age: user?.age || '',
+        height: user?.height || '',
+        weight: user?.weight || '',
+        gender: user?.gender || '',
+    });
+    const [showProfileEdit, setShowProfileEdit] = useState(false);
+
+    // Sync profile form with user data
+    useEffect(() => {
+        setProfileForm({
+            age: user?.age || '',
+            height: user?.height || '',
+            weight: user?.weight || '',
+            gender: user?.gender || '',
+        });
+    }, [user]);
 
     // Ensure user exists, fallback to default values
     const safeUser = user || { bmi: 23, age: 25, height: 170, weight: 70, gender: 'Other' };
@@ -79,13 +98,32 @@ const Dashboard = React.memo(function Dashboard({ user }) {
         }
     };
 
-    /**
+/**
      * Updates daily health metrics (steps/sleep) and persists to local storage.
      */
     const handleDailyDataUpdate = (field, value) => {
         const newData = { [field]: parseInt(value, 10) || 0 };
         const updated = storage.saveDailyData(newData);
         setDailyData(updated);
+    };
+
+    /**
+     * Handles profile update (age, height, weight, gender).
+     */
+    const handleProfileUpdate = () => {
+        const { age, height, weight, gender } = profileForm;
+        if (!age || !height || !weight || !gender) {
+            alert('Please fill in all fields!');
+            return;
+        }
+        const bmi = calculateBMI(weight, height);
+        const updatedUser = { ...user, ...profileForm, bmi };
+        storage.saveUserData(updatedUser);
+        // Update the user prop through parent
+        if (user && user.onUpdate) {
+            user.onUpdate(updatedUser);
+        }
+        alert('Profile updated successfully! 🎉');
     };
 
     /**
@@ -631,7 +669,16 @@ const Dashboard = React.memo(function Dashboard({ user }) {
     return (
         <div className="max-w-md mx-auto min-h-screen bg-slate-50 relative pb-32">
             {/* Header */}
-            <div className="p-6 pt-8 pb-4 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 rounded-3xl mx-4 mt-2 mb-6 shadow-2xl border border-blue-400/20">
+            <div className="p-6 pt-8 pb-4 bg-gradient-to-br from-slate-900 via-blue-900 to-purple-900 rounded-3xl mx-4 mt-2 mb-6 shadow-2xl border border-blue-400/20 relative">
+                {/* Edit Profile Button */}
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowProfileEdit(true)}
+                    className="absolute top-6 right-6 p-2 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 text-white hover:bg-white/30 transition-all z-10"
+                >
+                    <Pencil size={18} />
+                </motion.button>
                 <div className="flex justify-between items-start">
                     <div>
                         <p className="text-sm font-bold text-blue-300 uppercase tracking-widest mb-2">Welcome back</p>
@@ -1035,6 +1082,181 @@ const Dashboard = React.memo(function Dashboard({ user }) {
                         className="fixed top-6 left-6 right-6 z-50 p-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-2xl shadow-xl"
                     >
                         <p className="font-bold text-center">{streakNotification}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Profile Edit Modal - Onboarding Style */}
+            <AnimatePresence>
+                {showProfileEdit && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[130] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-lg"
+                    >
+                        {/* Animated Background */}
+                        <motion.div
+                            animate={{ rotate: 360, y: [0, 25, 0] }}
+                            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                            className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full blur-3xl"
+                        />
+                        <motion.div
+                            animate={{ rotate: -360, y: [0, -25, 0] }}
+                            transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                            className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full blur-3xl"
+                        />
+
+                        <motion.div
+                            initial={{ scale: 0.7, opacity: 0, y: 50 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.7, opacity: 0, y: 50 }}
+                            transition={{ type: "spring", damping: 15, stiffness: 300 }}
+                            className="w-full max-w-md relative z-10"
+                        >
+                            {/* Header */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="text-center mb-8"
+                            >
+                                <motion.div
+                                    animate={{ scale: [1, 1.08, 1] }}
+                                    transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
+                                    className="text-4xl mb-3"
+                                >
+                                    ✏️
+                                </motion.div>
+                                <h3 className="text-2xl font-black text-white drop-shadow-lg">Update Profile</h3>
+                                <p className="text-sm text-white/60 font-medium mt-1">Update your details anytime</p>
+                            </motion.div>
+
+                            {/* Form Card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="rounded-3xl bg-gradient-to-br from-blue-500 via-purple-600 to-pink-600 p-6 text-white shadow-2xl border border-white/10"
+                            >
+                                {/* Age Input */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.15 }}
+                                    className="mb-4"
+                                >
+                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">🎂 Age</label>
+                                    <input
+                                        type="number"
+                                        value={profileForm.age}
+                                        onChange={(e) => setProfileForm({ ...profileForm, age: e.target.value })}
+                                        placeholder="Enter your age"
+                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
+                                    />
+                                </motion.div>
+
+                                {/* Height Input */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-4"
+                                >
+                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">📏 Height (cm)</label>
+                                    <input
+                                        type="number"
+                                        value={profileForm.height}
+                                        onChange={(e) => setProfileForm({ ...profileForm, height: e.target.value })}
+                                        placeholder="Enter height in cm"
+                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
+                                    />
+                                </motion.div>
+
+                                {/* Weight Input */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.25 }}
+                                    className="mb-4"
+                                >
+                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">⚖️ Weight (kg)</label>
+                                    <input
+                                        type="number"
+                                        value={profileForm.weight}
+                                        onChange={(e) => setProfileForm({ ...profileForm, weight: e.target.value })}
+                                        placeholder="Enter weight in kg"
+                                        className="w-full p-4 rounded-2xl border-2 border-white/30 bg-white/10 backdrop-blur-sm focus:border-white focus:ring-0 outline-none transition-all text-lg text-white placeholder-white/50 font-bold"
+                                    />
+                                </motion.div>
+
+                                {/* Gender Selection */}
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="mb-6"
+                                >
+                                    <label className="text-xs font-bold text-white/80 uppercase tracking-wider mb-2 block">👤 Gender</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {GENDER_OPTIONS.map((opt, idx) => (
+                                            <motion.button
+                                                key={opt}
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: 0.35 + idx * 0.05 }}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => setProfileForm({ ...profileForm, gender: opt })}
+                                                className={`p-3 rounded-xl border-2 transition-all text-sm font-bold ${profileForm.gender === opt
+                                                        ? 'border-white bg-white/30 backdrop-blur-sm text-white'
+                                                        : 'border-white/30 bg-white/10 backdrop-blur-sm text-white/70 hover:border-white/50'
+                                                    }`}
+                                            >
+                                                {opt}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+
+                                {/* Buttons */}
+                                <motion.div
+                                    initial={{ opacity: 0, y: 15 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4 }}
+                                    className="flex gap-3"
+                                >
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setShowProfileEdit(false)}
+                                        className="flex-1 py-3 px-4 bg-white/10 backdrop-blur-sm text-white font-bold text-sm rounded-2xl border border-white/30 hover:bg-white/20 transition-all"
+                                    >
+                                        Cancel
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.05, y: -2 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => {
+                                            handleProfileUpdate();
+                                            setShowProfileEdit(false);
+                                        }}
+                                        className="flex-1 py-3 px-4 bg-white text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-black text-base rounded-2xl border-2 border-white hover:shadow-lg hover:shadow-white/20 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        Save 💾
+                                    </motion.button>
+                                </motion.div>
+                            </motion.div>
+
+                            {/* Motivational Text */}
+                            <motion.p
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="text-center text-white/50 text-xs mt-6 font-medium"
+                            >
+                                🎯 Keep your profile updated for better insights
+                            </motion.p>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
